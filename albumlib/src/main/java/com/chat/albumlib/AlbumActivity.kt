@@ -4,9 +4,15 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.chat.albumlib.ui.AlbumAdapter
+import com.chat.albumlib.ui.DirectoryAdapter
 import com.chat.albumlib.util.PermissionUtil
 import kotlinx.android.synthetic.main.activity_album.*
 
@@ -15,7 +21,7 @@ import kotlinx.android.synthetic.main.activity_album.*
  *
  * 相册的UI
  */
-class AlbumActivity : AppCompatActivity() {
+class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         fun start(context: Context, data: ArrayList<Image>, type: Int) {
@@ -51,7 +57,7 @@ class AlbumActivity : AppCompatActivity() {
 
     private val albumControlListen = object : AlbumControl.AlbumControlListen {
         override fun onInitFinish() {
-            if (initData){
+            if (initData) {
                 initData()
             }
         }
@@ -64,7 +70,8 @@ class AlbumActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album)
         initView()
-        init(intent)
+        initListen()
+        initData(intent)
     }
 
     override fun onDestroy() {
@@ -73,15 +80,58 @@ class AlbumActivity : AppCompatActivity() {
     }
 
     private var albumAdapter: AlbumAdapter? = null
+    private var directoryAdapter: DirectoryAdapter? = null
 
     private fun initView() {
         val lm = GridLayoutManager(this, 3)
         rv_album.layoutManager = lm
         albumAdapter = AlbumAdapter()
         rv_album.adapter = albumAdapter
+
+        val lm1 = LinearLayoutManager(this)
+        lm1.orientation = LinearLayoutManager.VERTICAL
+        rv_directory_select.layoutManager = lm1
+        directoryAdapter = DirectoryAdapter()
+        rv_directory_select.adapter = directoryAdapter
     }
 
-    private fun init(intent: Intent?) {
+    private fun initListen() {
+        iv_close.setOnClickListener(this)
+        fl_directory_bn.setOnClickListener(this)
+        vw_directory_select_mask.setOnClickListener(this)
+
+        directoryAdapter?.listen = object : DirectoryAdapter.DirectoryAdapterListen {
+            override fun onClickDirectory(directory: String) {
+                setCurPanel(directory)
+                hideDirectoryLayout()
+            }
+        }
+    }
+
+    override fun onClick(v: View?) {
+
+        if (inAnim) {
+            return
+        }
+
+        when (v) {
+            iv_close -> {
+                finish()
+            }
+            fl_directory_bn -> {
+                if (isShowDirectory) {
+                    hideDirectoryLayout()
+                } else {
+                    showDirectoryLayout()
+                }
+            }
+            vw_directory_select_mask -> {
+                hideDirectoryLayout()
+            }
+        }
+    }
+
+    private fun initData(intent: Intent?) {
         selectData =
             intent?.getSerializableExtra(KEY_SELECT_DATA) as? ArrayList<Image> ?: ArrayList()
         selectType =
@@ -99,11 +149,8 @@ class AlbumActivity : AppCompatActivity() {
     private var directories = ArrayList<String>()  /*需要包括All*/
     private var allImage = HashMap<String, ArrayList<Image>>()
 
-    private var curDirectory = "ALL"
+    private var curDirectory = "ALL" // 当前正在选址的路径
 
-    /**
-     * singTop
-     */
     private fun resetData() {
         initTypeFinish = 0
 
@@ -132,21 +179,23 @@ class AlbumActivity : AppCompatActivity() {
                     allList = ArrayList()
                     allImage["ALL"] = allList
                 }
-                allList.addAll(AlbumControl.allImage!!)
+                allList.addAll(AlbumControl.allImage ?: ArrayList())
 
                 // 按照路径添加
-                for (p in AlbumControl.imageDirectories!!) {
+                for (p in AlbumControl.imageDirectories ?: ArrayList()) {
 
                     // 目录不存在
                     if (!directories.contains(p)) {
                         directories.add(p)
                     }
 
-                    var imageList = AlbumControl.imageOfSort!![p]
+                    var imageList = allImage[p]
                     if (imageList == null) {
                         imageList = ArrayList()
                         allImage[p] = imageList
                     }
+
+                    imageList.addAll(AlbumControl.imageOfSort?.get(p) ?: ArrayList())
                 }
 
                 initTypeFinish = initTypeFinish or AlbumControl.IMAGE
@@ -165,21 +214,22 @@ class AlbumActivity : AppCompatActivity() {
                     allList = ArrayList()
                     allImage["ALL"] = allList
                 }
-                allList.addAll(AlbumControl.allVideo!!)
+                allList.addAll(AlbumControl.allVideo ?: ArrayList())
 
                 // 按照路径添加
-                for (p in AlbumControl.videoDirectories!!) {
+                for (p in AlbumControl.videoDirectories ?: ArrayList()) {
 
                     // 目录不存在
                     if (!directories.contains(p)) {
                         directories.add(p)
                     }
 
-                    var imageList = AlbumControl.videoOfSort!![p]
+                    var imageList = allImage[p]
                     if (imageList == null) {
                         imageList = ArrayList()
                         allImage[p] = imageList
                     }
+                    imageList.addAll(AlbumControl.videoOfSort?.get(p) ?: ArrayList())
                 }
 
                 initTypeFinish = initTypeFinish or AlbumControl.VIDEO
@@ -187,13 +237,105 @@ class AlbumActivity : AppCompatActivity() {
         }
 
         setCurPanel("ALL")
+        initDirectoryLayout()
     }
 
+    /**
+     * 设置当前选择图片路径
+     */
     private fun setCurPanel(directory: String) {
         curDirectory = directory
         albumAdapter?.setData(allImage[directory] ?: ArrayList())
         albumAdapter?.notifyDataSetChanged()
+        rv_album.scrollToPosition(0)
+
+        // 设置当前路径名
+        tv_directory.text = AlbumControl.getDirectoryName(directory)
     }
+
+    //*******************路径选择***********************
+
+    private var inAnim = false
+    private var isShowDirectory = false
+
+    private fun initDirectoryLayout() {
+        directoryAdapter?.images = allImage
+        directoryAdapter?.directories = directories
+        directoryAdapter?.notifyDataSetChanged()
+    }
+
+    private fun showDirectoryLayout() {
+        val alpha = AlphaAnimation(0f, 1f)
+        alpha.duration = 200
+        vw_directory_select_mask.startAnimation(alpha)
+        fl_directory_select.visibility = View.VISIBLE
+
+        rv_directory_select.visibility = View.INVISIBLE
+        val anim = TranslateAnimation(
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            -1f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f
+        )
+        anim.duration = 200
+        anim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                inAnim = false
+                isShowDirectory = true
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+                rv_directory_select.visibility = View.VISIBLE
+            }
+        })
+        inAnim = true
+        rv_directory_select.startAnimation(anim)
+
+    }
+
+    private fun hideDirectoryLayout() {
+        val anim = TranslateAnimation(
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            0f,
+            TranslateAnimation.RELATIVE_TO_SELF,
+            -1f
+        )
+        anim.duration = 200
+        anim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                rv_directory_select.visibility = View.INVISIBLE
+                fl_directory_select.visibility = View.GONE
+                isShowDirectory = false
+                inAnim = false
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+
+            }
+        })
+        inAnim = true
+        rv_directory_select.startAnimation(anim)
+
+        val alpha = AlphaAnimation(1f, 0f)
+        alpha.duration = 200
+        vw_directory_select_mask.startAnimation(alpha)
+    }
+
+    //******************************************
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

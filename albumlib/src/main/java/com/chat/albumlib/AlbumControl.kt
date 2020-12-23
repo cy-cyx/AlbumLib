@@ -117,6 +117,15 @@ object AlbumControl {
         }
     }
 
+    fun getDirectoryName(path: String): String {
+        var tempPath = path
+        if (tempPath.endsWith("/")) {
+            tempPath.subSequence(0, tempPath.length - 2)
+        }
+        val split = tempPath.split("\"")
+        return split.last()
+    }
+
     val listens = ArrayList<AlbumControlListen>()
 
     interface AlbumControlListen {
