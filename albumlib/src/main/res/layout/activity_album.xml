@@ -8,7 +8,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:visibility="gone">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -93,8 +94,74 @@
 
     <!--大图选择页面-->
     <LinearLayout
+        android:id="@+id/ll_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:background="#ffffff">
+
+            <ImageView
+                android:id="@+id/iv_preview_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|start"
+                android:layout_marginStart="15dp"
+                android:src="@drawable/ic_back" />
+
+        </FrameLayout>
+
+        <com.chat.albumlib.ui.ZoomImageView
+            android:id="@+id/ziv_preview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/fl_preview_select"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:background="#ffffff">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="45dp"
+                android:text="Select"
+                android:textColor="#FFBF31"
+                android:textSize="18dp" />
+
+            <FrameLayout
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="8dp"
+                android:padding="6dp">
+
+                <ImageView
+                    android:id="@+id/iv_preview_select_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/tv_preview_select_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="#ffffff"
+                    android:textSize="16dp" />
+            </FrameLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
 </FrameLayout>

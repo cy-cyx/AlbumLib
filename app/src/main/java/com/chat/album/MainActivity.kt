@@ -25,13 +25,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v) {
             bn_1 -> {
-                AlbumActivity.start(this, arrayListOf(), AlbumControl.IMAGE)
+                AlbumActivity.start(this, arrayListOf(), AlbumControl.IMAGE, 5)
             }
             bn_2 -> {
-                AlbumActivity.start(this, arrayListOf(), AlbumControl.VIDEO)
+                AlbumActivity.start(this, arrayListOf(), AlbumControl.VIDEO, 6)
             }
             bn_3 -> {
-                AlbumActivity.start(this, arrayListOf(), AlbumControl.IMAGEANDVIDEO)
+                AlbumActivity.start(this, arrayListOf(), AlbumControl.IMAGEANDVIDEO, 6)
             }
         }
     }

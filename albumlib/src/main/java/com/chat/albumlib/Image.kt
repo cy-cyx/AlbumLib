@@ -10,6 +10,26 @@ class Image : Serializable {
     companion object {
         @JvmStatic
         private val serialVersionUID = 1
+
+        fun inListItem(images: ArrayList<Image>, image: Image): Int {
+            var item = 1
+            for (i in 0..images.size) {
+                if (images[i].equals(image)) {
+                    item = i + 1
+                    break
+                }
+            }
+            return item
+        }
+
+        fun isSelectStatus(images: ArrayList<Image>, image: Image): Boolean {
+            for (m in images) {
+                if (m.equals(image)) {
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     var type = AlbumControl.IMAGE

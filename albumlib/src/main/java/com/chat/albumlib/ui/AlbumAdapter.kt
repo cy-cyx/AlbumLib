@@ -48,7 +48,7 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 override fun onClick(v: View?) {
                     listen?.onSelectStatus(
                         images[position],
-                        !isSelectStatus(selectImages, images[position])
+                        !Image.isSelectStatus(selectImages, images[position])
                     )
                 }
             })
@@ -73,12 +73,12 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
         fun setSelectStatus(image: Image) {
-            val isSelect = isSelectStatus(selectImages, image)
+            val isSelect = Image.isSelectStatus(selectImages, image)
             if (isSelect) {
                 itemView.findViewById<ImageView>(R.id.iv_select_bg)
                     .setImageResource(R.drawable.ic_album_choose)
                 itemView.findViewById<TextView>(R.id.tv_select_item).text =
-                    inListItem(selectImages, image).toString()
+                    Image.inListItem(selectImages, image).toString()
                 itemView.findViewById<View>(R.id.vw_mask).visibility = View.VISIBLE
             } else {
                 itemView.findViewById<ImageView>(R.id.iv_select_bg)
@@ -95,26 +95,6 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun setItemClick(listen: View.OnClickListener) {
             itemView.setOnClickListener(listen)
         }
-    }
-
-    private fun inListItem(images: ArrayList<Image>, image: Image): Int {
-        var item = 1
-        for (i in 0..images.size) {
-            if (images[i].equals(image)) {
-                item = i + 1
-                break
-            }
-        }
-        return item
-    }
-
-    private fun isSelectStatus(images: ArrayList<Image>, image: Image): Boolean {
-        for (m in images) {
-            if (m.equals(image)) {
-                return true
-            }
-        }
-        return false
     }
 
     interface AlbumAdapterListen {

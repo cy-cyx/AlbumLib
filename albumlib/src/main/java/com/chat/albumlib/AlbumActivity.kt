@@ -5,14 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.TranslateAnimation
+import android.view.animation.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.chat.albumlib.ui.AlbumAdapter
 import com.chat.albumlib.ui.DirectoryAdapter
 import com.chat.albumlib.ui.GridItemDecoration
@@ -27,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_album.*
 class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-        fun start(context: Context, data: ArrayList<Image>, type: Int) {
+        fun start(context: Context, data: ArrayList<Image>, type: Int, selectSize: Int) {
             PermissionUtil
                 .requestRuntimePermissions(context, arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -36,7 +37,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
                     override fun nextStep() {
                         AlbumControl.initImage(context.applicationContext)
                         AlbumControl.initVideo(context.applicationContext)
-                        startInner(context, data, type)
+                        startInner(context, data, type, selectSize)
                     }
 
                     override fun cancel() {
@@ -48,11 +49,13 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
         const val KEY_SELECT_DATA = "key_select_data"
         const val KEY_TYPE = "key_type"
+        const val KEY_MAX_SELECT_SIZE = "key_max_select_size"
 
-        fun startInner(context: Context, data: ArrayList<Image>, type: Int) {
+        fun startInner(context: Context, data: ArrayList<Image>, type: Int, selectSize: Int) {
             val intent = Intent(context, AlbumActivity::class.java)
             intent.putExtra(KEY_SELECT_DATA, data)
             intent.putExtra(KEY_TYPE, type)
+            intent.putExtra(KEY_MAX_SELECT_SIZE, selectSize)
             context.startActivity(intent)
         }
 
@@ -106,6 +109,9 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         fl_directory_bn.setOnClickListener(this)
         vw_directory_select_mask.setOnClickListener(this)
 
+        iv_preview_close.setOnClickListener(this)
+        fl_preview_select.setOnClickListener(this)
+
         directoryAdapter?.listen = object : DirectoryAdapter.DirectoryAdapterListen {
             override fun onClickDirectory(directory: String) {
                 setCurPanel(directory)
@@ -119,7 +125,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             override fun onClickPreview(image: Image, position: Int) {
-
+                clickPreview(image)
             }
 
         }
@@ -145,6 +151,12 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             vw_directory_select_mask -> {
                 hideDirectoryLayout()
             }
+            iv_preview_close -> {
+                hidePreviewLayout()
+            }
+            fl_preview_select -> {
+                clickPreviewSelect()
+            }
         }
     }
 
@@ -153,6 +165,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             intent?.getSerializableExtra(KEY_SELECT_DATA) as? ArrayList<Image> ?: ArrayList()
         selectType =
             intent?.getIntExtra(KEY_TYPE, AlbumControl.IMAGEANDVIDEO) ?: AlbumControl.IMAGEANDVIDEO
+        maxSelectSize = intent?.getIntExtra(KEY_MAX_SELECT_SIZE, 9) ?: 9
 
         albumAdapter?.selectImages = selectData
 
@@ -387,6 +400,138 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     //******************************************
 
+    //********************预览选中*************************
+
+    var curPreviewImage: Image? = null
+
+    private fun clickPreview(image: Image) {
+
+        if (image.type == AlbumControl.VIDEO) {
+            Toast.makeText(this, "Preview is temporarily not supported", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        curPreviewImage = image
+
+        val options = RequestOptions().placeholder(R.drawable.ic_placeholder)
+        Glide.with(this).load(image.path).apply(options)
+            .into(ziv_preview)
+
+        showPreviewLayout()
+
+        upDataPreviewSelectStatus()
+    }
+
+    private var isShowPreviewLayout = false
+
+    private fun showPreviewLayout() {
+        ll_preview.visibility = View.INVISIBLE
+        val scale = ScaleAnimation(
+            0.8f,
+            1f,
+            0.8f,
+            1f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f
+        )
+
+
+        val alpha = AlphaAnimation(0f, 1f)
+        vw_directory_select_mask.startAnimation(alpha)
+
+        val animSet = AnimationSet(false)
+        animSet.addAnimation(alpha)
+        animSet.addAnimation(scale)
+
+        animSet.duration = 200
+        animSet.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                inAnim = false
+                isShowPreviewLayout = true
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+                ll_preview.visibility = View.VISIBLE
+            }
+        })
+
+        inAnim = true
+
+        ll_preview.startAnimation(animSet)
+    }
+
+    private fun hidePreviewLayout() {
+        val scale = ScaleAnimation(
+            1f,
+            0.8f,
+            1f,
+            0.8f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f
+        )
+
+
+        val alpha = AlphaAnimation(1f, 0f)
+        vw_directory_select_mask.startAnimation(alpha)
+
+        val animSet = AnimationSet(false)
+        animSet.addAnimation(alpha)
+        animSet.addAnimation(scale)
+
+        animSet.duration = 200
+        animSet.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationRepeat(animation: Animation?) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                inAnim = false
+                isShowPreviewLayout = false
+                ll_preview.visibility = View.GONE
+            }
+
+            override fun onAnimationStart(animation: Animation?) {
+                ll_preview.visibility = View.VISIBLE
+            }
+        })
+
+        inAnim = true
+        ll_preview.startAnimation(animSet)
+    }
+
+    private fun upDataPreviewSelectStatus() {
+        curPreviewImage?.let {
+            val select = Image.isSelectStatus(selectData, it)
+
+            if (select) {
+                iv_preview_select_bg.setImageResource(R.drawable.ic_album_choose)
+                tv_preview_select_item.text = Image.inListItem(selectData, it).toString()
+            } else {
+                iv_preview_select_bg.setImageResource(R.drawable.ic_album_unchoose)
+                tv_preview_select_item.text = ""
+            }
+        }
+    }
+
+    private fun clickPreviewSelect() {
+        curPreviewImage?.let {
+            val select = Image.isSelectStatus(selectData, it)
+            setSelectStatus(it, !select)
+
+            upDataPreviewSelectStatus()
+        }
+    }
+
+    //**********************************************
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -401,4 +546,24 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         PermissionUtil.OnActivityResult(this, requestCode, resultCode, data)
     }
 
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (inAnim) {
+                return true
+            }
+
+            if (isShowPreviewLayout) {
+                hidePreviewLayout()
+                return true
+            }
+
+            if (isShowDirectory) {
+                hideDirectoryLayout()
+                return true
+            }
+
+        }
+        return super.onKeyDown(keyCode, event)
+    }
 }
