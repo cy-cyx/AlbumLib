@@ -3,7 +3,9 @@ package com.chat.albumlib.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -20,6 +22,8 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // 当前选中的集合用于显示选中
     var selectImages = ArrayList<Image>()
+
+    var listen: AlbumAdapterListen? = null
 
     fun setData(data: ArrayList<Image>) {
         images.clear()
@@ -39,6 +43,20 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is AlbumViewHolder) {
             holder.setImageContent(images[position].path)
+            holder.setSelectStatus(images[position])
+            holder.setSelectListen(object : View.OnClickListener {
+                override fun onClick(v: View?) {
+                    listen?.onSelectStatus(
+                        images[position],
+                        !isSelectStatus(selectImages, images[position])
+                    )
+                }
+            })
+            holder.setItemClick(object : View.OnClickListener {
+                override fun onClick(v: View?) {
+                    listen?.onClickPreview(images[position], position)
+                }
+            })
         }
     }
 
@@ -54,5 +72,53 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 .into(itemView.findViewById<ImageView>(R.id.iv_content))
         }
 
+        fun setSelectStatus(image: Image) {
+            val isSelect = isSelectStatus(selectImages, image)
+            if (isSelect) {
+                itemView.findViewById<ImageView>(R.id.iv_select_bg)
+                    .setImageResource(R.drawable.ic_album_choose)
+                itemView.findViewById<TextView>(R.id.tv_select_item).text =
+                    inListItem(selectImages, image).toString()
+                itemView.findViewById<View>(R.id.vw_mask).visibility = View.VISIBLE
+            } else {
+                itemView.findViewById<ImageView>(R.id.iv_select_bg)
+                    .setImageResource(R.drawable.ic_album_unchoose)
+                itemView.findViewById<TextView>(R.id.tv_select_item).text = ""
+                itemView.findViewById<View>(R.id.vw_mask).visibility = View.GONE
+            }
+        }
+
+        fun setSelectListen(listen: View.OnClickListener) {
+            itemView.findViewById<FrameLayout>(R.id.fl_select).setOnClickListener(listen)
+        }
+
+        fun setItemClick(listen: View.OnClickListener) {
+            itemView.setOnClickListener(listen)
+        }
+    }
+
+    private fun inListItem(images: ArrayList<Image>, image: Image): Int {
+        var item = 1
+        for (i in 0..images.size) {
+            if (images[i].equals(image)) {
+                item = i + 1
+                break
+            }
+        }
+        return item
+    }
+
+    private fun isSelectStatus(images: ArrayList<Image>, image: Image): Boolean {
+        for (m in images) {
+            if (m.equals(image)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    interface AlbumAdapterListen {
+        fun onSelectStatus(image: Image, selectStatus: Boolean)
+        fun onClickPreview(image: Image, position: Int)
     }
 }

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -67,6 +68,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     private var selectData = ArrayList<Image>()
     private var selectType = AlbumControl.IMAGEANDVIDEO
+    private var maxSelectSize = 9
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +111,17 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
                 setCurPanel(directory)
                 hideDirectoryLayout()
             }
+        }
+
+        albumAdapter?.listen = object : AlbumAdapter.AlbumAdapterListen {
+            override fun onSelectStatus(image: Image, selectStatus: Boolean) {
+                setSelectStatus(image, selectStatus)
+            }
+
+            override fun onClickPreview(image: Image, position: Int) {
+
+            }
+
         }
     }
 
@@ -259,6 +272,35 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
         // 设置当前路径名
         tv_directory.text = AlbumControl.getDirectoryName(directory)
+    }
+
+    /**
+     * 列表的选中和未选
+     */
+    private fun setSelectStatus(image: Image, selectStatus: Boolean) {
+        if (selectStatus) {
+            if (selectData.size >= maxSelectSize) {
+                Toast.makeText(this, "Upload up to ${maxSelectSize} images", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                selectData.add(image.clone())
+
+                // 刷新显示状态
+                albumAdapter?.notifyDataSetChanged()
+            }
+        } else {
+            var temp: Image? = null
+            for (m in selectData) {
+                if (m.equals(image)) {
+                    temp = m
+                    break
+                }
+            }
+            selectData.remove(temp)
+
+            // 刷新显示状态
+            albumAdapter?.notifyDataSetChanged()
+        }
     }
 
     //*******************路径选择***********************

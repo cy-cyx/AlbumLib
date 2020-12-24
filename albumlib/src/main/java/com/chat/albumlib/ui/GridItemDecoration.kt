@@ -1,8 +1,10 @@
 package com.chat.albumlib.ui
 
 import android.content.Context
-import android.graphics.*
-import android.view.View
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import androidx.recyclerview.widget.RecyclerView
 import com.chat.albumlib.util.CommonUtils
 

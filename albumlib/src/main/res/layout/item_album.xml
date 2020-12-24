@@ -6,15 +6,34 @@
     <ImageView
         android:id="@+id/iv_content"
         android:layout_width="match_parent"
-        android:scaleType="centerCrop"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:id="@+id/vw_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000" />
 
     <FrameLayout
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:id="@+id/fl_select"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
         android:layout_gravity="end"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="5dp">
+        android:layout_marginEnd="2dp"
+        android:padding="5dp">
 
+        <ImageView
+            android:id="@+id/iv_select_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_select_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="16dp" />
     </FrameLayout>
 </FrameLayout>
