@@ -31,7 +31,8 @@ class VideoScanner : BaseScanner() {
                 MediaStore.Video.Media.DATA,
                 MediaStore.Video.Media.DISPLAY_NAME,
                 MediaStore.Video.Media.DATE_MODIFIED,
-                MediaStore.Video.Media.MIME_TYPE
+                MediaStore.Video.Media.MIME_TYPE,
+                MediaStore.Video.VideoColumns.DURATION
             ),
             "${MediaStore.Video.Media.MIME_TYPE}=? or ${MediaStore.Video.Media.MIME_TYPE}=?",
             arrayOf("video/mp4", "video/x-sgi-movie"),
@@ -52,6 +53,8 @@ class VideoScanner : BaseScanner() {
                 cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE))
             image.time =
                 cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_MODIFIED))
+            image.duration =
+                cursor.getLong(cursor.getColumnIndex(MediaStore.Video.VideoColumns.DURATION))
             results.add(image)
         }
 

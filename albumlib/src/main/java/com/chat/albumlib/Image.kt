@@ -17,6 +17,7 @@ class Image : Serializable {
     var fileName = ""
     var mineType = ""
     var time = 0L
+    var duration = 0L
 
     fun equals(other: Image): Boolean {
 

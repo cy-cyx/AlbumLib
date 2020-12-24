@@ -46,8 +46,10 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     inner class AlbumViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+
         fun setImageContent(path: String) {
             Glide.with(itemView.context).load(path).into(itemView.findViewById<ImageView>(R.id.iv_content))
         }
+
     }
 }

@@ -34,8 +34,11 @@ class DirectoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is DirectoryViewHolder) {
-            holder.setLogo(images[directories[position]]?.get(0)?.path ?: "")
+            if (images[directories[position]]?.isNotEmpty() == true) {
+                holder.setLogo(images[directories[position]]?.get(0)?.path ?: "")
+            }
             holder.setDirectoryName(directories[position])
+            holder.setImageSum(images[directories[position]]?.size ?: 1)
             holder.setClick(object : View.OnClickListener {
                 override fun onClick(v: View?) {
                     listen?.onClickDirectory(directories[position])
@@ -58,6 +61,10 @@ class DirectoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun setDirectoryName(path: String) {
             itemView.findViewById<TextView>(R.id.tv_directory_path).text =
                 AlbumControl.getDirectoryName(path)
+        }
+
+        fun setImageSum(sum: Int) {
+            itemView.findViewById<TextView>(R.id.tv_sum).text = "(${sum})"
         }
 
         fun setClick(listen: View.OnClickListener) {

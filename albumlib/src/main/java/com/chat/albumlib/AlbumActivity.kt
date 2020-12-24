@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -68,6 +69,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AlbumControl.listens.add(albumControlListen)
         setContentView(R.layout.activity_album)
         initView()
         initListen()
@@ -173,6 +175,8 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             // 原数据准备好,还没初始化数据源
             if (AlbumControl.initImageFinish.get() && (initTypeFinish and AlbumControl.IMAGE) != AlbumControl.IMAGE) {
 
+                Log.d("xx","初始图片")
+
                 // ALL
                 var allList = allImage["ALL"]
                 if (allList == null) {
@@ -204,6 +208,8 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
         // 支持选择视频
         if ((selectType and AlbumControl.VIDEO) == AlbumControl.VIDEO) {
+
+            Log.d("xx","初始视频")
 
             // 原数据准备好,还没初始化数据源
             if (AlbumControl.initVideoFinish.get() && (initTypeFinish and AlbumControl.VIDEO) != AlbumControl.VIDEO) {
