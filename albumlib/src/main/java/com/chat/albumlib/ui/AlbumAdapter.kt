@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.chat.albumlib.Image
 import com.chat.albumlib.R
 import com.chat.albumlib.util.CommonUtils
@@ -48,7 +49,9 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class AlbumViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
         fun setImageContent(path: String) {
-            Glide.with(itemView.context).load(path).into(itemView.findViewById<ImageView>(R.id.iv_content))
+            val options = RequestOptions().placeholder(R.drawable.ic_placeholder)
+            Glide.with(itemView.context).load(path).apply(options)
+                .into(itemView.findViewById<ImageView>(R.id.iv_content))
         }
 
     }

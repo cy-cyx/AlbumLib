@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chat.albumlib.ui.AlbumAdapter
 import com.chat.albumlib.ui.DirectoryAdapter
+import com.chat.albumlib.ui.GridItemDecoration
 import com.chat.albumlib.util.PermissionUtil
 import kotlinx.android.synthetic.main.activity_album.*
 
@@ -89,6 +90,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         rv_album.layoutManager = lm
         albumAdapter = AlbumAdapter()
         rv_album.adapter = albumAdapter
+        rv_album.addItemDecoration(GridItemDecoration(this))
 
         val lm1 = LinearLayoutManager(this)
         lm1.orientation = LinearLayoutManager.VERTICAL
@@ -175,7 +177,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             // 原数据准备好,还没初始化数据源
             if (AlbumControl.initImageFinish.get() && (initTypeFinish and AlbumControl.IMAGE) != AlbumControl.IMAGE) {
 
-                Log.d("xx","初始图片")
+                Log.d("xx", "初始图片")
 
                 // ALL
                 var allList = allImage["ALL"]
@@ -209,7 +211,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         // 支持选择视频
         if ((selectType and AlbumControl.VIDEO) == AlbumControl.VIDEO) {
 
-            Log.d("xx","初始视频")
+            Log.d("xx", "初始视频")
 
             // 原数据准备好,还没初始化数据源
             if (AlbumControl.initVideoFinish.get() && (initTypeFinish and AlbumControl.VIDEO) != AlbumControl.VIDEO) {
