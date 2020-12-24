@@ -1,6 +1,7 @@
 package com.chat.albumlib
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -28,7 +29,13 @@ import kotlinx.android.synthetic.main.activity_album.*
 class AlbumActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-        fun start(context: Context, data: ArrayList<Image>, type: Int, selectSize: Int) {
+        fun start(
+            context: Activity,
+            data: ArrayList<Image>,
+            type: Int,
+            selectSize: Int,
+            requestCode: Int
+        ) {
             PermissionUtil
                 .requestRuntimePermissions(context, arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -37,7 +44,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
                     override fun nextStep() {
                         AlbumControl.initImage(context.applicationContext)
                         AlbumControl.initVideo(context.applicationContext)
-                        startInner(context, data, type, selectSize)
+                        startInner(context, data, type, selectSize, requestCode)
                     }
 
                     override fun cancel() {
@@ -51,12 +58,18 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         const val KEY_TYPE = "key_type"
         const val KEY_MAX_SELECT_SIZE = "key_max_select_size"
 
-        fun startInner(context: Context, data: ArrayList<Image>, type: Int, selectSize: Int) {
+        fun startInner(
+            context: Activity,
+            data: ArrayList<Image>,
+            type: Int,
+            selectSize: Int,
+            requestCode: Int
+        ) {
             val intent = Intent(context, AlbumActivity::class.java)
             intent.putExtra(KEY_SELECT_DATA, data)
             intent.putExtra(KEY_TYPE, type)
             intent.putExtra(KEY_MAX_SELECT_SIZE, selectSize)
-            context.startActivity(intent)
+            context.startActivityForResult(intent, requestCode)
         }
 
     }
@@ -108,6 +121,7 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         iv_close.setOnClickListener(this)
         fl_directory_bn.setOnClickListener(this)
         vw_directory_select_mask.setOnClickListener(this)
+        tv_done.setOnClickListener(this)
 
         iv_preview_close.setOnClickListener(this)
         fl_preview_select.setOnClickListener(this)
@@ -138,6 +152,16 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         when (v) {
+            tv_done -> {
+                if (selectData.isEmpty()) {
+                    Toast.makeText(this, "Select at least one", Toast.LENGTH_SHORT).show()
+                } else {
+                    val intent = Intent()
+                    intent.putExtra(KEY_SELECT_DATA, selectData)
+                    setResult(200, intent)
+                    finish()
+                }
+            }
             iv_close -> {
                 finish()
             }
@@ -314,6 +338,8 @@ class AlbumActivity : AppCompatActivity(), View.OnClickListener {
             // 刷新显示状态
             albumAdapter?.notifyDataSetChanged()
         }
+
+        tv_done.text = "Done (${selectData.size})"
     }
 
     //*******************路径选择***********************

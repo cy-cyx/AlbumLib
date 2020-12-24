@@ -8,8 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:visibility="gone">
+        android:orientation="vertical">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -53,10 +52,17 @@
                         android:src="@drawable/ic_album_directory_open" />
 
                 </LinearLayout>
-
             </FrameLayout>
 
-
+            <TextView
+                android:id="@+id/tv_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="14dp"
+                android:text="Done"
+                android:textColor="#FFBF31"
+                android:textSize="16dp" />
         </FrameLayout>
 
         <FrameLayout
@@ -101,8 +107,7 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:visibility="gone">
 
         <FrameLayout
             android:layout_width="match_parent"
