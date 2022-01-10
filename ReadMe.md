@@ -1,0 +1,1 @@
+[![](https://jitpack.io/v/cy-cyx/AlbumLib.svg)](https://jitpack.io/#cy-cyx/AlbumLib)
