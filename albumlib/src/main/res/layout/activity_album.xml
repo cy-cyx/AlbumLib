@@ -91,7 +91,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_directory_select"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="wrap_content"
                     android:background="#ffffff" />
             </FrameLayout>
         </FrameLayout>

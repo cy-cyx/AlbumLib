@@ -15,10 +15,10 @@ import com.chat.albumlib.util.CommonUtils
 class GridItemDecoration(var context: Context) : RecyclerView.ItemDecoration() {
 
     private val dividerPaint: Paint = Paint()
-    private val dividerSize = CommonUtils.dp2px(context, 3f)
+    private val dividerSize = CommonUtils.dp2px(context, 1f)
 
     init {
-        dividerPaint.color = Color.parseColor("#000000")
+        dividerPaint.color = Color.parseColor("#ffffff")
     }
 
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {

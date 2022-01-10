@@ -20,7 +20,7 @@ object AlbumControl {
     const val VIDEO = 1 shl 1
     const val IMAGEANDVIDEO = IMAGE or VIDEO
 
-    val mianHandler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     internal var initImageFinish = AtomicBoolean(false)
     internal var initVideoFinish = AtomicBoolean(false)
@@ -57,7 +57,7 @@ object AlbumControl {
             initImageFinish.set(true)
 
             // 存在异步需要通知一下外面
-            mianHandler.post {
+            mainHandler.post {
                 listens.forEach { it.onInitFinish() }
             }
         }
@@ -87,7 +87,7 @@ object AlbumControl {
             initVideoFinish.set(true)
 
             // 存在异步需要通知一下外面
-            mianHandler.post {
+            mainHandler.post {
                 listens.forEach { it.onInitFinish() }
 
             }

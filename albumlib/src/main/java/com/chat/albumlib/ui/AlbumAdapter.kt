@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.chat.albumlib.AlbumControl
 import com.chat.albumlib.Image
 import com.chat.albumlib.R
 import com.chat.albumlib.util.CommonUtils
@@ -44,6 +45,7 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         if (holder is AlbumViewHolder) {
             holder.setImageContent(images[position].path)
             holder.setSelectStatus(images[position])
+            holder.setTimeNeed(images[position])
             holder.setSelectListen(object : View.OnClickListener {
                 override fun onClick(v: View?) {
                     listen?.onSelectStatus(
@@ -88,6 +90,15 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
         }
 
+        fun setTimeNeed(image: Image) {
+            if (image.type == AlbumControl.IMAGE) {
+                itemView.findViewById<TextView>(R.id.tv_time).visibility = View.GONE
+            } else {
+                itemView.findViewById<TextView>(R.id.tv_time).visibility = View.VISIBLE
+                itemView.findViewById<TextView>(R.id.tv_time).text = getDuration(image.duration)
+            }
+        }
+
         fun setSelectListen(listen: View.OnClickListener) {
             itemView.findViewById<FrameLayout>(R.id.fl_select).setOnClickListener(listen)
         }
@@ -95,6 +106,28 @@ class AlbumAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun setItemClick(listen: View.OnClickListener) {
             itemView.setOnClickListener(listen)
         }
+    }
+
+    private fun getDuration(duration: Long): String {
+        val hour = duration / (1000 * 60 * 60)
+        val minute = duration % (1000 * 60 * 60) / (1000 * 60)
+        val minute00 = if (minute > 10) {
+            "$minute"
+        } else {
+            "0$minute"
+        }
+        val second = duration % (1000 * 60) / 1000
+        val second00 = if (second > 10) {
+            "$second"
+        } else {
+            "0$second"
+        }
+        return if (hour == 0L) {
+            "$minute00:$second00 "
+        } else {
+            "$hour:$minute00:$second00 "
+        }
+
     }
 
     interface AlbumAdapterListen {
